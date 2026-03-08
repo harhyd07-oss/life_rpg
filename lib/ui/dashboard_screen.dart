@@ -15,7 +15,42 @@ class DashboardScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text("Life RPG")),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          ref.read(habitProvider.notifier).addHabit("New Habit");
+          final controller = TextEditingController();
+
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text("Add Habit"),
+                content: TextField(
+                  controller: controller,
+                  decoration: const InputDecoration(
+                    hintText: "Enter habit name",
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Cancel"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      final title = controller.text.trim();
+
+                      if (title.isNotEmpty) {
+                        ref.read(habitProvider.notifier).addHabit(title);
+                      }
+
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Add"),
+                  ),
+                ],
+              );
+            },
+          );
         },
         child: const Icon(Icons.add),
       ),
