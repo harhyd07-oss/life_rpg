@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'ui/dashboard_screen.dart';
 
 void main() {
-  runApp(const LifeRPGApp());
+  runApp(const ProviderScope(child: LifeRPGApp()));
 }
 
 class LifeRPGApp extends StatelessWidget {
@@ -13,9 +15,7 @@ class LifeRPGApp extends StatelessWidget {
       title: "Life RPG",
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: const Scaffold(
-        body: Center(child: Text("Life RPG", style: TextStyle(fontSize: 30))),
-      ),
+      home: const DashboardScreen(),
     );
   }
 }
