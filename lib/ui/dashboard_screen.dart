@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../player/player_provider.dart';
 import '../player/player_model.dart';
 import '../tasks/providers/habit_provider.dart';
+import '../tasks/providers/daily_provider.dart';
+import '../tasks/models/daily_model.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -18,6 +20,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget build(BuildContext context) {
     final player = ref.watch(playerProvider);
     final habits = ref.watch(habitProvider);
+    final dailies = ref.watch(dailyProvider);
 
     // Level-up detection — compare previous level to current
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -31,20 +34,40 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       appBar: AppBar(title: const Text('Life RPG'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _PlayerStatsCard(player: player),
-            const SizedBox(height: 24),
-            const Text(
-              'Habits',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: habits.isEmpty
-                  ? const Center(child: Text('No habits yet. Add one!'))
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _PlayerStatsCard(player: player),
+              const SizedBox(height: 24),
+
+              // ── Habits Section ──────────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Habits',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _showAddHabitDialog(context),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Add'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              habits.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        'No habits yet. Add one!',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
                   : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: habits.length,
                       itemBuilder: (context, index) {
                         final habit = habits[index];
@@ -66,8 +89,75 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         );
                       },
                     ),
-            ),
-          ],
+
+              const SizedBox(height: 24),
+
+              // ── Dailies Section ─────────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Dailies',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _showAddDailyDialog(context),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Add'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              dailies.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        'No dailies yet. Add one!',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: dailies.length,
+                      itemBuilder: (context, index) {
+                        final daily = dailies[index];
+                        return Card(
+                          child: ListTile(
+                            title: Text(daily.title),
+                            subtitle: Text(
+                              'Streak: ${daily.streak} day${daily.streak == 1 ? '' : 's'}',
+                              style: TextStyle(
+                                color: daily.streak > 0
+                                    ? Colors.orange
+                                    : Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
+                            trailing: daily.wasCompletedToday
+                                ? const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                  )
+                                : IconButton(
+                                    icon: const Icon(
+                                      Icons.check_circle_outline,
+                                      color: Colors.green,
+                                    ),
+                                    onPressed: () {
+                                      ref
+                                          .read(dailyProvider.notifier)
+                                          .completeDaily(daily.id);
+                                    },
+                                  ),
+                          ),
+                        );
+                      },
+                    ),
+
+              const SizedBox(height: 80), // padding above FAB
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -117,6 +207,37 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               final name = controller.text.trim();
               if (name.isNotEmpty) {
                 ref.read(habitProvider.notifier).addHabit(name);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddDailyDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('New Daily'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Enter daily name'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                ref.read(dailyProvider.notifier).addDaily(name);
                 Navigator.pop(context);
               }
             },
