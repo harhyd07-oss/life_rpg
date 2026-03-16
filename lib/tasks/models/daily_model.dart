@@ -1,11 +1,25 @@
-class Daily {
-  final String id;
-  final String title;
-  final bool completedToday;
-  final int streak;
-  final DateTime? lastCompletedDate;
+import 'package:hive/hive.dart';
 
-  const Daily({
+part 'daily_model.g.dart';
+
+@HiveType(typeId: 2)
+class Daily extends HiveObject {
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  final String title;
+
+  @HiveField(2)
+  bool completedToday;
+
+  @HiveField(3)
+  int streak;
+
+  @HiveField(4)
+  DateTime? lastCompletedDate;
+
+  Daily({
     required this.id,
     required this.title,
     this.completedToday = false,
@@ -13,8 +27,6 @@ class Daily {
     this.lastCompletedDate,
   });
 
-  /// Whether this daily was completed yesterday.
-  /// Used to determine if streak should continue or reset.
   bool get wasCompletedYesterday {
     if (lastCompletedDate == null) return false;
     final yesterday = DateTime.now().subtract(const Duration(days: 1));
@@ -23,7 +35,6 @@ class Daily {
         lastCompletedDate!.day == yesterday.day;
   }
 
-  /// Whether this daily was completed today.
   bool get wasCompletedToday {
     if (lastCompletedDate == null) return false;
     final today = DateTime.now();

@@ -1,21 +1,36 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import 'player_model.dart';
 import '../core/xp_system.dart';
 import '../core/level_system.dart';
 import '../core/economy_system.dart';
 
 class PlayerNotifier extends StateNotifier<PlayerModel> {
-  PlayerNotifier() : super(const PlayerModel());
+  PlayerNotifier() : super(PlayerModel()) {
+    _loadFromHive();
+  }
 
-  /// Call this when a task is completed.
-  /// Handles XP gain, level-up check, gold reward, and health restore.
+  // Load saved player from Hive, or use default if none exists
+  void _loadFromHive() {
+    final box = Hive.box<PlayerModel>('playerBox');
+    final saved = box.get('player');
+    if (saved != null) {
+      state = saved;
+    }
+  }
+
+  // Save current player state to Hive
+  void _save() {
+    final box = Hive.box<PlayerModel>('playerBox');
+    box.put('player', state);
+  }
+
   void addXp(int amount) {
     int newXp = state.xp + amount;
     int newLevel = state.level;
     int newGold = state.gold;
     int newHealth = state.health;
 
-    // Loop handles multiple level-ups in one XP gain (edge case).
     while (XpSystem.shouldLevelUp(newXp, newLevel)) {
       newXp = LevelSystem.carryOverXp(newXp, newLevel);
       newLevel = LevelSystem.applyLevelUp(newLevel);
@@ -29,17 +44,18 @@ class PlayerNotifier extends StateNotifier<PlayerModel> {
       gold: newGold,
       health: newHealth,
     );
+    _save();
   }
 
-  /// Call this when a task grants gold directly.
   void addGold(int amount) {
     state = state.copyWith(gold: state.gold + amount);
+    _save();
   }
 
-  /// Call this to reduce player health (e.g. missed dailies).
   void takeDamage(int amount) {
     final newHealth = (state.health - amount).clamp(0, 100);
     state = state.copyWith(health: newHealth);
+    _save();
   }
 }
 

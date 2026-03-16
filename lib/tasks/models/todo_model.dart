@@ -1,10 +1,22 @@
-class Todo {
+import 'package:hive/hive.dart';
+
+part 'todo_model.g.dart';
+
+@HiveType(typeId: 3)
+class Todo extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String title;
-  final bool completed;
+
+  @HiveField(2)
+  bool completed;
+
+  @HiveField(3)
   final DateTime createdAt;
 
-  const Todo({
+  Todo({
     required this.id,
     required this.title,
     this.completed = false,

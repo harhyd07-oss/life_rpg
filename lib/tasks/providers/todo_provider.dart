@@ -1,17 +1,30 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import '../../player/player_provider.dart';
 import '../models/todo_model.dart';
 
 class TodoNotifier extends StateNotifier<List<Todo>> {
-  TodoNotifier(this.ref) : super([]);
+  TodoNotifier(this.ref) : super([]) {
+    _loadFromHive();
+  }
 
   final Ref ref;
 
-  /// XP rewarded per todo completion.
   static const int todoXp = 25;
-
-  /// Gold rewarded per todo completion.
   static const int todoGold = 10;
+
+  void _loadFromHive() {
+    final box = Hive.box<Todo>('todoBox');
+    state = box.values.toList();
+  }
+
+  void _save() {
+    final box = Hive.box<Todo>('todoBox');
+    box.clear();
+    for (final todo in state) {
+      box.put(todo.id, todo);
+    }
+  }
 
   void addTodo(String title) {
     final newTodo = Todo(
@@ -20,21 +33,19 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
       createdAt: DateTime.now(),
     );
     state = [...state, newTodo];
+    _save();
   }
 
   void completeTodo(String id) {
-    final player = ref.read(playerProvider.notifier);
-
-    // Remove completed todo from the list
     state = state.where((todo) => todo.id != id).toList();
-
-    // Reward player
-    player.addXp(todoXp);
-    player.addGold(todoGold);
+    _save();
+    ref.read(playerProvider.notifier).addXp(todoXp);
+    ref.read(playerProvider.notifier).addGold(todoGold);
   }
 
   void deleteTodo(String id) {
     state = state.where((todo) => todo.id != id).toList();
+    _save();
   }
 }
 
