@@ -50,7 +50,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         final habit = habits[index];
                         return Card(
                           child: ListTile(
-                            title: Text(habit.name),
+                            title: Text(habit.title),
                             trailing: IconButton(
                               icon: const Icon(
                                 Icons.check_circle_outline,

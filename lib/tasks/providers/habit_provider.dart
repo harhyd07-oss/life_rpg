@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/xp_system.dart';
 import '../../player/player_provider.dart';
 import '../models/habit_model.dart';
 
@@ -10,7 +9,6 @@ class HabitNotifier extends StateNotifier<List<Habit>> {
 
   void addHabit(String title) {
     final newHabit = Habit(id: DateTime.now().toString(), title: title);
-
     state = [...state, newHabit];
   }
 
@@ -23,13 +21,8 @@ class HabitNotifier extends StateNotifier<List<Habit>> {
           habit,
     ];
 
-    final player = ref.read(playerProvider.notifier);
-    final xp = xpForTask("habit");
-
-    player.update((p) {
-      p.xp += xp;
-      return p;
-    });
+    // Correctly calls addXp() on PlayerNotifier
+    ref.read(playerProvider.notifier).addXp(20);
   }
 }
 
