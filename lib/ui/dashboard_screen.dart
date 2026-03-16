@@ -4,7 +4,7 @@ import '../player/player_provider.dart';
 import '../player/player_model.dart';
 import '../tasks/providers/habit_provider.dart';
 import '../tasks/providers/daily_provider.dart';
-import '../tasks/models/daily_model.dart';
+import '../tasks/providers/todo_provider.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -21,6 +21,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final player = ref.watch(playerProvider);
     final habits = ref.watch(habitProvider);
     final dailies = ref.watch(dailyProvider);
+    final todos = ref.watch(todoProvider);
 
     // Level-up detection — compare previous level to current
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -155,6 +156,82 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       },
                     ),
 
+              const SizedBox(height: 24),
+
+              // ── Todos Section ───────────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'To-Dos',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _showAddTodoDialog(context),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Add'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              todos.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        'No to-dos yet. Add one!',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: todos.length,
+                      itemBuilder: (context, index) {
+                        final todo = todos[index];
+                        return Card(
+                          child: ListTile(
+                            title: Text(todo.title),
+                            subtitle: Text(
+                              'Added ${_formatDate(todo.createdAt)}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Complete button
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.check_circle_outline,
+                                    color: Colors.green,
+                                  ),
+                                  onPressed: () {
+                                    ref
+                                        .read(todoProvider.notifier)
+                                        .completeTodo(todo.id);
+                                  },
+                                ),
+                                // Delete button
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.redAccent,
+                                  ),
+                                  onPressed: () {
+                                    ref
+                                        .read(todoProvider.notifier)
+                                        .deleteTodo(todo.id);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
               const SizedBox(height: 80), // padding above FAB
             ],
           ),
@@ -246,6 +323,49 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ],
       ),
     );
+  }
+
+  void _showAddTodoDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('New To-Do'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Enter task name'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                ref.read(todoProvider.notifier).addTodo(name);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Formats date as 'today', 'yesterday', or 'dd/mm/yyyy'
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final taskDate = DateTime(date.year, date.month, date.day);
+    final diff = today.difference(taskDate).inDays;
+
+    if (diff == 0) return 'today';
+    if (diff == 1) return 'yesterday';
+    return '${date.day}/${date.month}/${date.year}';
   }
 }
 
