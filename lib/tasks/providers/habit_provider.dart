@@ -4,15 +4,13 @@ import '../../player/player_provider.dart';
 import '../models/habit_model.dart';
 
 class HabitNotifier extends StateNotifier<List<Habit>> {
-  HabitNotifier(this.ref) : super([]) {
-    _loadFromHive();
-  }
+  HabitNotifier(this.ref) : super(_loadInitialState());
 
   final Ref ref;
 
-  void _loadFromHive() {
+  static List<Habit> _loadInitialState() {
     final box = Hive.box<Habit>('habitBox');
-    state = box.values.toList();
+    return box.values.toList();
   }
 
   void _save() {

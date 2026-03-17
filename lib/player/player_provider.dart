@@ -6,20 +6,13 @@ import '../core/level_system.dart';
 import '../core/economy_system.dart';
 
 class PlayerNotifier extends StateNotifier<PlayerModel> {
-  PlayerNotifier() : super(PlayerModel()) {
-    _loadFromHive();
-  }
+  PlayerNotifier() : super(_loadInitialState());
 
-  // Load saved player from Hive, or use default if none exists
-  void _loadFromHive() {
+  static PlayerModel _loadInitialState() {
     final box = Hive.box<PlayerModel>('playerBox');
-    final saved = box.get('player');
-    if (saved != null) {
-      state = saved;
-    }
+    return box.get('player') ?? PlayerModel();
   }
 
-  // Save current player state to Hive
   void _save() {
     final box = Hive.box<PlayerModel>('playerBox');
     box.put('player', state);
