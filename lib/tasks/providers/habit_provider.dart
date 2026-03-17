@@ -4,13 +4,16 @@ import '../../player/player_provider.dart';
 import '../models/habit_model.dart';
 
 class HabitNotifier extends StateNotifier<List<Habit>> {
-  HabitNotifier(this.ref) : super(_loadInitialState());
+  HabitNotifier(this.ref) : super([]) {
+    // Load after provider is fully initialized
+    Future.microtask(() => _loadFromHive());
+  }
 
   final Ref ref;
 
-  static List<Habit> _loadInitialState() {
+  void _loadFromHive() {
     final box = Hive.box<Habit>('habitBox');
-    return box.values.toList();
+    state = box.values.toList();
   }
 
   void _save() {

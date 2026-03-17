@@ -10,16 +10,13 @@ import 'ui/dashboard_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Hive
   await Hive.initFlutter();
 
-  // Register adapters
   Hive.registerAdapter(PlayerModelAdapter());
   Hive.registerAdapter(HabitAdapter());
   Hive.registerAdapter(DailyAdapter());
   Hive.registerAdapter(TodoAdapter());
 
-  // Open boxes
   await Hive.openBox<PlayerModel>('playerBox');
   await Hive.openBox<Habit>('habitBox');
   await Hive.openBox<Daily>('dailyBox');
@@ -36,8 +33,19 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Life RPG',
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.dark,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.light,
+        ),
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.dark,
+        ),
         useMaterial3: true,
       ),
       home: const DashboardScreen(),
