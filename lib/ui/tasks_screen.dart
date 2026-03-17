@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../tasks/providers/habit_provider.dart';
 import '../tasks/providers/daily_provider.dart';
 import '../tasks/providers/todo_provider.dart';
-import '../player/player_provider.dart';
 
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
@@ -292,7 +291,7 @@ class _TaskCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: color.withOpacity(0.4), width: 1),
+        side: BorderSide(color: color.withValues(alpha: 0.4), width: 1),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -300,7 +299,7 @@ class _TaskCard extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
+            color: color.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: color, size: 22),
@@ -349,12 +348,15 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: Colors.grey.withOpacity(0.4)),
+          Icon(icon, size: 64, color: Colors.grey.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey.withOpacity(0.6), fontSize: 16),
+            style: TextStyle(
+              color: Colors.grey.withValues(alpha: 0.6),
+              fontSize: 16,
+            ),
           ),
         ],
       ),

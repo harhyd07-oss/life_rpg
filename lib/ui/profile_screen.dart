@@ -26,7 +26,7 @@ class ProfileScreen extends ConsumerWidget {
                   children: [
                     CircleAvatar(
                       radius: 36,
-                      backgroundColor: Colors.deepPurple.withOpacity(0.2),
+                      backgroundColor: Colors.deepPurple.withValues(alpha: 0.2),
                       child: const Icon(
                         Icons.person,
                         size: 40,
@@ -48,7 +48,7 @@ class ProfileScreen extends ConsumerWidget {
                           'Level ${player.level} Hero',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.deepPurple.withOpacity(0.8),
+                            color: Colors.deepPurple.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -161,7 +161,7 @@ class _StatBar extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 12,
-              backgroundColor: Colors.grey.withOpacity(0.2),
+              backgroundColor: Colors.grey.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
@@ -189,9 +189,9 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
