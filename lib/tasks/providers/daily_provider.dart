@@ -4,7 +4,9 @@ import '../../player/player_provider.dart';
 import '../models/daily_model.dart';
 
 class DailyNotifier extends StateNotifier<List<Daily>> {
-  DailyNotifier(this.ref) : super(_loadInitialState());
+  DailyNotifier(this.ref) : super([]) {
+    Future.microtask(() => _loadFromHive());
+  }
 
   final Ref ref;
 
@@ -12,9 +14,9 @@ class DailyNotifier extends StateNotifier<List<Daily>> {
   static const int streakBonusXp = 10;
   static const int dailyGold = 15;
 
-  static List<Daily> _loadInitialState() {
+  void _loadFromHive() {
     final box = Hive.box<Daily>('dailyBox');
-    return box.values.toList();
+    state = box.values.toList();
   }
 
   void _save() {

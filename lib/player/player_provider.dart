@@ -6,11 +6,16 @@ import '../core/level_system.dart';
 import '../core/economy_system.dart';
 
 class PlayerNotifier extends StateNotifier<PlayerModel> {
-  PlayerNotifier() : super(_loadInitialState());
+  PlayerNotifier() : super(PlayerModel()) {
+    Future.microtask(() => _loadFromHive());
+  }
 
-  static PlayerModel _loadInitialState() {
+  void _loadFromHive() {
     final box = Hive.box<PlayerModel>('playerBox');
-    return box.get('player') ?? PlayerModel();
+    final saved = box.get('player');
+    if (saved != null) {
+      state = saved;
+    }
   }
 
   void _save() {

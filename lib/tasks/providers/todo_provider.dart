@@ -4,16 +4,18 @@ import '../../player/player_provider.dart';
 import '../models/todo_model.dart';
 
 class TodoNotifier extends StateNotifier<List<Todo>> {
-  TodoNotifier(this.ref) : super(_loadInitialState());
+  TodoNotifier(this.ref) : super([]) {
+    Future.microtask(() => _loadFromHive());
+  }
 
   final Ref ref;
 
   static const int todoXp = 25;
   static const int todoGold = 10;
 
-  static List<Todo> _loadInitialState() {
+  void _loadFromHive() {
     final box = Hive.box<Todo>('todoBox');
-    return box.values.toList();
+    state = box.values.toList();
   }
 
   void _save() {
