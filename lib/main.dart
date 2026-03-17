@@ -5,7 +5,7 @@ import 'player/player_model.dart';
 import 'tasks/models/habit_model.dart';
 import 'tasks/models/daily_model.dart';
 import 'tasks/models/todo_model.dart';
-import 'ui/dashboard_screen.dart';
+import 'ui/main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const DashboardScreen(),
+      home: const MainScreen(),
     );
   }
 }
