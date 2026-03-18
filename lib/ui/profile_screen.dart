@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../player/player_provider.dart';
+import '../core/theme_provider.dart';
+import '../core/app_theme.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -8,30 +10,29 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final player = ref.watch(playerProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? AppTheme.darkPrimary : AppTheme.lightPrimary;
+    final secondaryColor = isDark
+        ? AppTheme.darkSecondary
+        : AppTheme.lightSecondary;
+    final goldColor = isDark ? AppTheme.darkGold : AppTheme.lightGold;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile'), centerTitle: true),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Avatar + name card
+            // ── Avatar + Name Card ────────────────────────
             Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Row(
                   children: [
                     CircleAvatar(
                       radius: 36,
-                      backgroundColor: Colors.deepPurple.withValues(alpha: 0.2),
-                      child: const Icon(
-                        Icons.person,
-                        size: 40,
-                        color: Colors.deepPurple,
-                      ),
+                      backgroundColor: primaryColor.withValues(alpha: 0.2),
+                      child: Icon(Icons.person, size: 40, color: primaryColor),
                     ),
                     const SizedBox(width: 16),
                     Column(
@@ -48,7 +49,8 @@ class ProfileScreen extends ConsumerWidget {
                           'Level ${player.level} Hero',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.deepPurple.withValues(alpha: 0.8),
+                            color: primaryColor,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
@@ -58,23 +60,22 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            // Stats card
+            // ── Stats Card ────────────────────────────────
             Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Stats',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                        letterSpacing: 1.2,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -85,35 +86,129 @@ class ProfileScreen extends ConsumerWidget {
                       value: player.xp,
                       max: player.xpToNextLevel,
                       progress: player.xpProgress,
-                      color: Colors.deepPurple,
+                      color: primaryColor,
                       icon: Icons.star,
                     ),
                     const SizedBox(height: 12),
 
-                    // Health Bar
+                    // HP Bar
                     _StatBar(
                       label: 'HP',
                       value: player.health,
                       max: 100,
                       progress: player.health / 100,
-                      color: Colors.red,
+                      color: secondaryColor,
                       icon: Icons.favorite,
                     ),
                     const SizedBox(height: 20),
 
-                    // Gold + Level row
+                    // Gold + Level chips
                     Row(
                       children: [
                         _StatChip(
                           icon: Icons.monetization_on,
                           label: '${player.gold} Gold',
-                          color: Colors.amber,
+                          color: goldColor,
                         ),
                         const SizedBox(width: 12),
                         _StatChip(
                           icon: Icons.shield,
                           label: 'Level ${player.level}',
-                          color: Colors.deepPurple,
+                          color: primaryColor,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // ── Theme Toggle Card ─────────────────────────
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          isDark ? Icons.dark_mode : Icons.light_mode,
+                          color: primaryColor,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          isDark ? 'Shadow Monarch' : "Monarch's Ascension",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Switch(
+                      value: isDark,
+                      onChanged: (_) {
+                        ref.read(themeProvider.notifier).toggleTheme();
+                      },
+                      activeThumbColor: AppTheme.darkPrimary,
+                      activeTrackColor: AppTheme.darkPrimary.withValues(
+                        alpha: 0.3,
+                      ),
+                      inactiveThumbColor: AppTheme.lightPrimary,
+                      inactiveTrackColor: AppTheme.lightPrimary.withValues(
+                        alpha: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // ── Stats Summary Card ────────────────────────
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Progress',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _ProgressStat(
+                          label: 'Level',
+                          value: '${player.level}',
+                          color: primaryColor,
+                          icon: Icons.trending_up,
+                        ),
+                        _ProgressStat(
+                          label: 'Gold',
+                          value: '${player.gold}',
+                          color: goldColor,
+                          icon: Icons.monetization_on,
+                        ),
+                        _ProgressStat(
+                          label: 'Health',
+                          value: '${player.health}%',
+                          color: secondaryColor,
+                          icon: Icons.favorite,
                         ),
                       ],
                     ),
@@ -128,6 +223,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
+// ── Stat Bar ────────────────────────────────────────────────
 class _StatBar extends StatelessWidget {
   final String label;
   final int value;
@@ -161,7 +257,9 @@ class _StatBar extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 12,
-              backgroundColor: Colors.grey.withValues(alpha: 0.2),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
@@ -173,6 +271,7 @@ class _StatBar extends StatelessWidget {
   }
 }
 
+// ── Stat Chip ───────────────────────────────────────────────
 class _StatChip extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -203,6 +302,57 @@ class _StatChip extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Progress Stat ───────────────────────────────────────────
+class _ProgressStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+  final IconData icon;
+
+  const _ProgressStat({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+            border: Border.all(color: color.withValues(alpha: 0.4), width: 1.5),
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+      ],
     );
   }
 }
