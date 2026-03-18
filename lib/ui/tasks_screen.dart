@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../tasks/providers/habit_provider.dart';
 import '../tasks/providers/daily_provider.dart';
 import '../tasks/providers/todo_provider.dart';
+import '../core/app_theme.dart';
 
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
@@ -32,6 +33,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
     final habits = ref.watch(habitProvider);
     final dailies = ref.watch(dailyProvider);
     final todos = ref.watch(todoProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? AppTheme.darkPrimary : AppTheme.lightPrimary;
 
     return Scaffold(
       appBar: AppBar(
@@ -79,14 +82,23 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddDialog(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Task'),
+        icon: Icon(
+          Icons.add,
+          color: isDark ? AppTheme.darkBackground : AppTheme.lightCard,
+        ),
+        label: Text(
+          'Add Task',
+          style: TextStyle(
+            color: isDark ? AppTheme.darkBackground : AppTheme.lightCard,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: primaryColor,
       ),
     );
   }
 
   void _showAddDialog(BuildContext context) {
-    // Opens dialog based on current tab
     final tab = _tabController.index;
     if (tab == 0) _showAddHabitDialog(context);
     if (tab == 1) _showAddDailyDialog(context);
@@ -162,6 +174,8 @@ class _HabitsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final habits = ref.watch(habitProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = isDark ? AppTheme.darkPrimary : AppTheme.lightPrimary;
 
     if (habits.isEmpty) {
       return const _EmptyState(
@@ -178,7 +192,7 @@ class _HabitsTab extends ConsumerWidget {
         return _TaskCard(
           title: habit.title,
           subtitle: habit.completed ? 'Completed' : 'Tap to complete',
-          color: Colors.deepPurple,
+          color: color,
           icon: Icons.repeat,
           onComplete: () =>
               ref.read(habitProvider.notifier).completeHabit(habit.id),
@@ -193,6 +207,10 @@ class _DailiesTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dailies = ref.watch(dailyProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final activeColor = isDark
+        ? AppTheme.darkSecondary
+        : AppTheme.lightSecondary;
 
     if (dailies.isEmpty) {
       return const _EmptyState(
@@ -210,7 +228,7 @@ class _DailiesTab extends ConsumerWidget {
           title: daily.title,
           subtitle:
               'Streak: ${daily.streak} day${daily.streak == 1 ? '' : 's'}',
-          color: daily.wasCompletedToday ? Colors.green : Colors.orange,
+          color: daily.wasCompletedToday ? Colors.green : activeColor,
           icon: Icons.calendar_today,
           isCompleted: daily.wasCompletedToday,
           onComplete: daily.wasCompletedToday
@@ -227,6 +245,8 @@ class _TodosTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final todos = ref.watch(todoProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = isDark ? AppTheme.darkPrimary : AppTheme.lightPrimary;
 
     if (todos.isEmpty) {
       return const _EmptyState(
@@ -243,7 +263,7 @@ class _TodosTab extends ConsumerWidget {
         return _TaskCard(
           title: todo.title,
           subtitle: 'Added ${_formatDate(todo.createdAt)}',
-          color: Colors.blue,
+          color: color,
           icon: Icons.check_box_outline_blank,
           onComplete: () =>
               ref.read(todoProvider.notifier).completeTodo(todo.id),
@@ -309,10 +329,20 @@ class _TaskCard extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.w600,
             decoration: isCompleted ? TextDecoration.lineThrough : null,
-            color: isCompleted ? Colors.grey : null,
+            color: isCompleted
+                ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)
+                : null,
           ),
         ),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -348,13 +378,21 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: Colors.grey.withValues(alpha: 0.4)),
+          Icon(
+            icon,
+            size: 64,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.3),
+          ),
           const SizedBox(height: 16),
           Text(
             message,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.grey.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: 16,
             ),
           ),
@@ -372,16 +410,17 @@ class _CountBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (count == 0) return const SizedBox.shrink();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.deepPurple,
+        color: isDark ? AppTheme.darkPrimary : AppTheme.lightPrimary,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         '$count',
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: isDark ? AppTheme.darkBackground : AppTheme.lightCard,
           fontSize: 11,
           fontWeight: FontWeight.bold,
         ),

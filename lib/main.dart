@@ -5,6 +5,8 @@ import 'player/player_model.dart';
 import 'tasks/models/habit_model.dart';
 import 'tasks/models/daily_model.dart';
 import 'tasks/models/todo_model.dart';
+import 'core/app_theme.dart';
+import 'core/theme_provider.dart';
 import 'ui/main_screen.dart';
 
 void main() async {
@@ -21,33 +23,24 @@ void main() async {
   await Hive.openBox<Habit>('habitBox');
   await Hive.openBox<Daily>('dailyBox');
   await Hive.openBox<Todo>('todoBox');
+  await Hive.openBox('settingsBox');
 
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+
     return MaterialApp(
       title: 'Life RPG',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      themeMode: themeMode,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       home: const MainScreen(),
     );
   }
