@@ -55,6 +55,12 @@ class PlayerNotifier extends StateNotifier<PlayerModel> {
     state = state.copyWith(health: newHealth);
     _save();
   }
+
+  void spendGold(int amount) {
+    final newGold = (state.gold - amount).clamp(0, 999999);
+    state = state.copyWith(gold: newGold);
+    _save();
+  }
 }
 
 final playerProvider = StateNotifierProvider<PlayerNotifier, PlayerModel>((
