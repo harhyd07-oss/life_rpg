@@ -111,15 +111,22 @@ class RewardScreen extends ConsumerWidget {
                             ),
                             child: Icon(
                               Icons.card_giftcard,
-                              color: goldColor,
+                              color: canAfford
+                                  ? goldColor
+                                  : Theme.of(context).colorScheme.onSurface
+                                        .withValues(alpha: 0.3),
                               size: 24,
                             ),
                           ),
                           title: Text(
                             reward.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
+                              color: canAfford
+                                  ? null
+                                  : Theme.of(context).colorScheme.onSurface
+                                        .withValues(alpha: 0.4),
                             ),
                           ),
                           subtitle: Row(
@@ -127,51 +134,63 @@ class RewardScreen extends ConsumerWidget {
                               Icon(
                                 Icons.monetization_on,
                                 size: 14,
-                                color: goldColor,
+                                color: canAfford ? goldColor : Colors.redAccent,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${reward.goldCost} Gold',
                                 style: TextStyle(
-                                  color: goldColor,
+                                  color: canAfford
+                                      ? goldColor
+                                      : Colors.redAccent,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
+                              if (!canAfford) ...[
+                                const SizedBox(width: 6),
+                                const Text(
+                                  '— Not enough gold',
+                                  style: TextStyle(
+                                    color: Colors.redAccent,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Redeem button
-                              ElevatedButton(
-                                onPressed: canAfford
-                                    ? () => _redeemReward(
-                                        context,
-                                        ref,
-                                        reward.id,
-                                        reward.title,
-                                        reward.goldCost,
-                                      )
-                                    : null,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: canAfford
-                                      ? goldColor
-                                      : Theme.of(context).colorScheme.onSurface
-                                            .withValues(alpha: 0.1),
-                                  foregroundColor: isDark
-                                      ? AppTheme.darkBackground
-                                      : AppTheme.lightCard,
+                              // Redeem button — always has onPressed
+                              // canAfford check happens inside
+                              GestureDetector(
+                                onTap: () => _redeemReward(
+                                  context,
+                                  ref,
+                                  reward.id,
+                                  reward.title,
+                                  reward.goldCost,
+                                  canAfford,
+                                ),
+                                child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
+                                    horizontal: 14,
                                     vertical: 8,
                                   ),
-                                  minimumSize: Size.zero,
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                child: const Text(
-                                  'Redeem',
-                                  style: TextStyle(fontSize: 13),
+                                  decoration: BoxDecoration(
+                                    color: canAfford
+                                        ? Colors.green
+                                        : Colors.redAccent,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    canAfford ? 'Redeem' : 'Need Gold',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 4),
@@ -219,29 +238,51 @@ class RewardScreen extends ConsumerWidget {
     String id,
     String title,
     int goldCost,
+    bool canAfford,
   ) {
-    final success = ref.read(rewardProvider.notifier).redeemReward(id);
+    if (!canAfford) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.cancel, color: Colors.redAccent),
+              SizedBox(width: 8),
+              Text(
+                'Not enough gold!',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red.shade800,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    ref.read(rewardProvider.notifier).redeemReward(id);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            Icon(
-              success ? Icons.check_circle : Icons.cancel,
-              color: success ? Colors.green : Colors.redAccent,
-            ),
+            const Icon(Icons.check_circle, color: Colors.white),
             const SizedBox(width: 8),
-            Text(
-              success
-                  ? 'Redeemed "$title" for $goldCost gold!'
-                  : 'Not enough gold!',
-              style: const TextStyle(fontWeight: FontWeight.w600),
+            Expanded(
+              child: Text(
+                'Redeemed "$title" for $goldCost gold!',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ],
         ),
-        backgroundColor: success
-            ? Colors.green.withValues(alpha: 0.2)
-            : Colors.red.withValues(alpha: 0.2),
+        backgroundColor: Colors.green.shade700,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -284,7 +325,6 @@ class RewardScreen extends ConsumerWidget {
             onPressed: () {
               final title = titleController.text.trim();
               final gold = int.tryParse(goldController.text.trim());
-
               if (title.isNotEmpty && gold != null && gold > 0) {
                 ref.read(rewardProvider.notifier).addReward(title, gold);
                 Navigator.pop(context);
