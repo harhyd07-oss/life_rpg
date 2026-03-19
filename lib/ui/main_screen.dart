@@ -4,7 +4,6 @@ import '../core/reset_service.dart';
 import 'tasks_screen.dart';
 import 'profile_screen.dart';
 import 'reward_screen.dart';
-import 'package:hive/hive.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -25,7 +24,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   void initState() {
     super.initState();
-    // Check and reset dailies on app start
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ResetService.checkAndReset(ref);
     });
@@ -57,21 +55,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             label: 'Rewards',
           ),
         ],
-      ),
-      // Add this temporarily to test reset
-      // Remove after testing
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          final box = Hive.box('settingsBox');
-          // Set last reset to yesterday to simulate a new day
-          final yesterday = DateTime.now().subtract(const Duration(days: 1));
-          box.put('lastResetDate', yesterday.toIso8601String());
-          ResetService.checkAndReset(ref);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Daily reset triggered!')),
-          );
-        },
-        child: const Icon(Icons.refresh),
       ),
     );
   }

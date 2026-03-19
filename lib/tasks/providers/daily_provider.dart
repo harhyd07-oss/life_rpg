@@ -57,9 +57,7 @@ class DailyNotifier extends StateNotifier<List<Daily>> {
 
     for (final daily in state) {
       if (!daily.wasCompletedToday && !daily.wasCompletedYesterday) {
-        if (daily.streak > 0) {
-          player.takeDamage(10);
-        }
+        player.takeDamage(10);
       }
     }
 
