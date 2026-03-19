@@ -157,7 +157,7 @@ class AnalyticsScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${((player.xpProgress) * 100).toStringAsFixed(1)}% to next level',
+                      '${((player.xpProgress) * 100).toStringAsFixed(1)}% completed!',
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(
