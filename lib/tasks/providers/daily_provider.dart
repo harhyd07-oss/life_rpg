@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import '../../player/player_provider.dart';
 import '../../core/analytics_provider.dart';
 import '../models/daily_model.dart';
+import '../../core/character_class.dart';
 
 class DailyNotifier extends StateNotifier<List<Daily>> {
   DailyNotifier(this.ref) : super([]) {
@@ -11,7 +12,7 @@ class DailyNotifier extends StateNotifier<List<Daily>> {
 
   final Ref ref;
 
-  static const int dailyXp = 30;
+  static const int dailyBaseXp = 30;
   static const int streakBonusXp = 10;
   static const int dailyGold = 15;
 
@@ -35,8 +36,6 @@ class DailyNotifier extends StateNotifier<List<Daily>> {
   }
 
   void completeDaily(String id) {
-    final player = ref.read(playerProvider.notifier);
-
     state = [
       for (final daily in state)
         if (daily.id == id && !daily.wasCompletedToday)
@@ -47,10 +46,15 @@ class DailyNotifier extends StateNotifier<List<Daily>> {
     _save();
 
     final completed = state.firstWhere((d) => d.id == id);
-    final totalXp = dailyXp + (completed.streak > 1 ? streakBonusXp : 0);
 
-    player.addXp(totalXp);
-    player.addGold(dailyGold);
+    // Apply class multiplier
+    final player = ref.read(playerProvider);
+    final multiplier = player.characterClass?.dailyMultiplier ?? 1.0;
+    final baseXp = dailyBaseXp + (completed.streak > 1 ? streakBonusXp : 0);
+    final totalXp = (baseXp * multiplier).round();
+
+    ref.read(playerProvider.notifier).addXp(totalXp);
+    ref.read(playerProvider.notifier).addGold(dailyGold);
     ref
         .read(analyticsProvider.notifier)
         .recordDailyCompleted(totalXp, completed.streak);

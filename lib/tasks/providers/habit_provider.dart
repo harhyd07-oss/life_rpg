@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import '../../player/player_provider.dart';
 import '../../core/analytics_provider.dart';
 import '../models/habit_model.dart';
+import '../../core/character_class.dart';
 
 class HabitNotifier extends StateNotifier<List<Habit>> {
   HabitNotifier(this.ref) : super([]) {
@@ -39,8 +40,14 @@ class HabitNotifier extends StateNotifier<List<Habit>> {
           habit,
     ];
     _save();
-    ref.read(playerProvider.notifier).addXp(20);
-    ref.read(analyticsProvider.notifier).recordHabitCompleted(20);
+
+    // Apply class multiplier
+    final player = ref.read(playerProvider);
+    final multiplier = player.characterClass?.habitMultiplier ?? 1.0;
+    final xp = (20 * multiplier).round();
+
+    ref.read(playerProvider.notifier).addXp(xp);
+    ref.read(analyticsProvider.notifier).recordHabitCompleted(xp);
   }
 }
 

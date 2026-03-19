@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import '../../player/player_provider.dart';
 import '../../core/analytics_provider.dart';
 import '../models/todo_model.dart';
+import '../../core/character_class.dart';
 
 class TodoNotifier extends StateNotifier<List<Todo>> {
   TodoNotifier(this.ref) : super([]) {
@@ -11,7 +12,7 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
 
   final Ref ref;
 
-  static const int todoXp = 25;
+  static const int todoBaseXp = 25;
   static const int todoGold = 10;
 
   void _loadFromHive() {
@@ -40,9 +41,15 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
   void completeTodo(String id) {
     state = state.where((todo) => todo.id != id).toList();
     _save();
-    ref.read(playerProvider.notifier).addXp(todoXp);
+
+    // Apply class multiplier
+    final player = ref.read(playerProvider);
+    final multiplier = player.characterClass?.todoMultiplier ?? 1.0;
+    final xp = (todoBaseXp * multiplier).round();
+
+    ref.read(playerProvider.notifier).addXp(xp);
     ref.read(playerProvider.notifier).addGold(todoGold);
-    ref.read(analyticsProvider.notifier).recordTodoCompleted(todoXp);
+    ref.read(analyticsProvider.notifier).recordTodoCompleted(xp);
   }
 
   void deleteTodo(String id) {

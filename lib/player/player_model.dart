@@ -1,10 +1,11 @@
 import 'package:hive/hive.dart';
 import '../core/xp_system.dart';
+import '../core/character_class.dart';
 
 part 'player_model.g.dart';
 
 @HiveType(typeId: 0)
-class PlayerModel extends HiveObject {
+class PlayerModel {
   @HiveField(0)
   final int xp;
 
@@ -17,17 +18,41 @@ class PlayerModel extends HiveObject {
   @HiveField(3)
   final int health;
 
-  PlayerModel({this.xp = 0, this.level = 1, this.gold = 0, this.health = 100});
+  @HiveField(4)
+  final int characterClassIndex;
+
+  PlayerModel({
+    this.xp = 0,
+    this.level = 1,
+    this.gold = 0,
+    this.health = 100,
+    this.characterClassIndex = -1, // -1 means no class selected yet
+  });
+
+  /// Returns the current character class or null if not selected
+  CharacterClass? get characterClass {
+    if (characterClassIndex < 0) return null;
+    return CharacterClass.values[characterClassIndex];
+  }
+
+  bool get hasSelectedClass => characterClassIndex >= 0;
 
   int get xpToNextLevel => XpSystem.xpRequiredForLevel(level);
   double get xpProgress => (xp / xpToNextLevel).clamp(0.0, 1.0);
 
-  PlayerModel copyWith({int? xp, int? level, int? gold, int? health}) {
+  PlayerModel copyWith({
+    int? xp,
+    int? level,
+    int? gold,
+    int? health,
+    int? characterClassIndex,
+  }) {
     return PlayerModel(
       xp: xp ?? this.xp,
       level: level ?? this.level,
       gold: gold ?? this.gold,
       health: health ?? this.health,
+      characterClassIndex: characterClassIndex ?? this.characterClassIndex,
     );
   }
 }

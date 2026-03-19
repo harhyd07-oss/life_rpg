@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../player/player_provider.dart';
 import '../core/theme_provider.dart';
 import '../core/app_theme.dart';
+import '../ui/class_selection_screen.dart';
+import '../core/character_class.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -79,7 +81,71 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
+                    // ── Character Class Card ──────────────────────────
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: primaryColor.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: primaryColor.withValues(alpha: 0.4),
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  player.characterClass?.emoji ?? '?',
+                                  style: const TextStyle(fontSize: 26),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    player.characterClass?.displayName ??
+                                        'No Class',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    player.characterClass?.bonusDescription ??
+                                        'Select a class',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: primaryColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const ClassSelectionScreen(
+                                      isFirstTime: false,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: const Text('Change'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                     // XP Bar
                     _StatBar(
                       label: 'XP',
