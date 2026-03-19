@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../../player/player_provider.dart';
+import '../../core/analytics_provider.dart';
 import '../models/habit_model.dart';
 
 class HabitNotifier extends StateNotifier<List<Habit>> {
   HabitNotifier(this.ref) : super([]) {
-    // Load after provider is fully initialized
     Future.microtask(() => _loadFromHive());
   }
 
@@ -40,6 +40,7 @@ class HabitNotifier extends StateNotifier<List<Habit>> {
     ];
     _save();
     ref.read(playerProvider.notifier).addXp(20);
+    ref.read(analyticsProvider.notifier).recordHabitCompleted(20);
   }
 }
 

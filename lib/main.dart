@@ -9,6 +9,7 @@ import 'core/app_theme.dart';
 import 'core/theme_provider.dart';
 import 'ui/main_screen.dart';
 import 'rewards/reward_model.dart';
+import 'core/analytics_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,14 +21,14 @@ void main() async {
   Hive.registerAdapter(DailyAdapter());
   Hive.registerAdapter(TodoAdapter());
   Hive.registerAdapter(RewardAdapter());
-
+  Hive.registerAdapter(AnalyticsModelAdapter());
   await Hive.openBox<PlayerModel>('playerBox');
   await Hive.openBox<Habit>('habitBox');
   await Hive.openBox<Daily>('dailyBox');
   await Hive.openBox<Todo>('todoBox');
   await Hive.openBox<Reward>('rewardBox');
   await Hive.openBox('settingsBox');
-
+  await Hive.openBox<AnalyticsModel>('analyticsBox');
   runApp(const ProviderScope(child: MyApp()));
 }
 

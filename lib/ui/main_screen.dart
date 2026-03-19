@@ -4,6 +4,7 @@ import '../core/reset_service.dart';
 import 'tasks_screen.dart';
 import 'profile_screen.dart';
 import 'reward_screen.dart';
+import 'analytics_screen.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -19,6 +20,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     TasksScreen(),
     ProfileScreen(),
     RewardScreen(),
+    AnalyticsScreen(),
   ];
 
   @override
@@ -53,6 +55,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             icon: Icon(Icons.store_outlined),
             selectedIcon: Icon(Icons.store),
             label: 'Rewards',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
+            label: 'Analytics',
           ),
         ],
       ),

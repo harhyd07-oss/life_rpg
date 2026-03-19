@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../../player/player_provider.dart';
+import '../../core/analytics_provider.dart';
 import '../models/daily_model.dart';
 
 class DailyNotifier extends StateNotifier<List<Daily>> {
@@ -50,6 +51,9 @@ class DailyNotifier extends StateNotifier<List<Daily>> {
 
     player.addXp(totalXp);
     player.addGold(dailyGold);
+    ref
+        .read(analyticsProvider.notifier)
+        .recordDailyCompleted(totalXp, completed.streak);
   }
 
   void resetDailies() {

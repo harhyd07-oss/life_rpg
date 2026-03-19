@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../../player/player_provider.dart';
+import '../../core/analytics_provider.dart';
 import '../models/todo_model.dart';
 
 class TodoNotifier extends StateNotifier<List<Todo>> {
@@ -41,6 +42,7 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
     _save();
     ref.read(playerProvider.notifier).addXp(todoXp);
     ref.read(playerProvider.notifier).addGold(todoGold);
+    ref.read(analyticsProvider.notifier).recordTodoCompleted(todoXp);
   }
 
   void deleteTodo(String id) {
