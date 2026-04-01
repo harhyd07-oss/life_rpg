@@ -21,14 +21,17 @@ class PlayerModelAdapter extends TypeAdapter<PlayerModel> {
       level: fields[1] as int,
       gold: fields[2] as int,
       health: fields[3] as int,
-      characterClassIndex: fields[4] as int,
+      legacyClassIndex: fields[4] as int,
+      warriorPoints: fields[5] as int,
+      magePoints: fields[6] as int,
+      roguePoints: fields[7] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, PlayerModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.xp)
       ..writeByte(1)
@@ -38,7 +41,13 @@ class PlayerModelAdapter extends TypeAdapter<PlayerModel> {
       ..writeByte(3)
       ..write(obj.health)
       ..writeByte(4)
-      ..write(obj.characterClassIndex);
+      ..write(obj.legacyClassIndex)
+      ..writeByte(5)
+      ..write(obj.warriorPoints)
+      ..writeByte(6)
+      ..write(obj.magePoints)
+      ..writeByte(7)
+      ..write(obj.roguePoints);
   }
 
   @override

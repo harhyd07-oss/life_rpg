@@ -26,31 +26,31 @@ extension CharacterClassExtension on CharacterClass {
   String get description {
     switch (this) {
       case CharacterClass.warrior:
-        return 'Masters of discipline and physical strength. Gain +50% XP from Habits.';
+        return 'Discipline and strength. Each affinity point gives +5% XP from Habits.';
       case CharacterClass.mage:
-        return 'Seekers of knowledge and mental growth. Gain +50% XP from Dailies.';
+        return 'Knowledge and growth. Each affinity point gives +5% XP from Dailies.';
       case CharacterClass.rogue:
-        return 'Experts of consistency and precision. Gain +50% XP from To-Dos.';
+        return 'Precision and focus. Each affinity point gives +5% XP from To-Dos.';
     }
   }
 
-  String get bonusDescription {
+  /// Returns the XP multiplier for this class given how many affinity points
+  /// are assigned to it. 0 pts = 1.0x, 10 pts = 1.5x, linear in between.
+  double multiplierForPoints(int points) {
+    final clamped = points.clamp(0, 10);
+    return 1.0 + (clamped / 10) * 0.5;
+  }
+
+  /// Convenience: bonus percentage string for UI display
+  String bonusDescriptionForPoints(int points) {
+    final percent = (points * 5).clamp(0, 50);
     switch (this) {
       case CharacterClass.warrior:
-        return '+50% XP from Habits';
+        return '+$percent% XP from Habits';
       case CharacterClass.mage:
-        return '+50% XP from Dailies';
+        return '+$percent% XP from Dailies';
       case CharacterClass.rogue:
-        return '+50% XP from To-Dos';
+        return '+$percent% XP from To-Dos';
     }
   }
-
-  /// XP multiplier for habits
-  double get habitMultiplier => this == CharacterClass.warrior ? 1.5 : 1.0;
-
-  /// XP multiplier for dailies
-  double get dailyMultiplier => this == CharacterClass.mage ? 1.5 : 1.0;
-
-  /// XP multiplier for todos
-  double get todoMultiplier => this == CharacterClass.rogue ? 1.5 : 1.0;
 }
