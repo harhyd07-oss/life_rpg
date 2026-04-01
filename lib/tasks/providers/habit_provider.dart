@@ -43,7 +43,7 @@ class HabitNotifier extends StateNotifier<List<Habit>> {
 
     // Apply class multiplier
     final player = ref.read(playerProvider);
-    final multiplier = player.characterClass?.habitMultiplier ?? 1.0;
+    final multiplier = player.habitMultiplier;
     final xp = (20 * multiplier).round();
 
     ref.read(playerProvider.notifier).addXp(xp);

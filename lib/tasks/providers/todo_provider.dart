@@ -44,7 +44,7 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
 
     // Apply class multiplier
     final player = ref.read(playerProvider);
-    final multiplier = player.characterClass?.todoMultiplier ?? 1.0;
+    final multiplier = player.todoMultiplier;
     final xp = (todoBaseXp * multiplier).round();
 
     ref.read(playerProvider.notifier).addXp(xp);

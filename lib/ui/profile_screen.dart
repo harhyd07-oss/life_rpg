@@ -4,7 +4,6 @@ import '../player/player_provider.dart';
 import '../core/theme_provider.dart';
 import '../core/app_theme.dart';
 import '../ui/class_selection_screen.dart';
-import '../core/character_class.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -81,71 +80,71 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const SizedBox(height: 12),
 
-                    // ── Character Class Card ──────────────────────────
+                    // ── Affinity Card ─────────────────────
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 52,
-                              height: 52,
-                              decoration: BoxDecoration(
-                                color: primaryColor.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: primaryColor.withValues(alpha: 0.4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Class Affinities',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: primaryColor,
+                                  ),
                                 ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  player.characterClass?.emoji ?? '?',
-                                  style: const TextStyle(fontSize: 26),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const ClassSelectionScreen(
+                                              isFirstTime: false,
+                                            ),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text('Change'),
                                 ),
-                              ),
+                              ],
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    player.characterClass?.displayName ??
-                                        'No Class',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    player.characterClass?.bonusDescription ??
-                                        'Select a class',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: primaryColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            const SizedBox(height: 12),
+                            _AffinityRow(
+                              emoji: '⚔️',
+                              label: 'Warrior',
+                              sublabel: 'Habits',
+                              points: player.warriorPoints,
+                              color: Colors.orange,
                             ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => const ClassSelectionScreen(
-                                      isFirstTime: false,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: const Text('Change'),
+                            const SizedBox(height: 8),
+                            _AffinityRow(
+                              emoji: '🔮',
+                              label: 'Mage',
+                              sublabel: 'Dailies',
+                              points: player.magePoints,
+                              color: Colors.blue,
+                            ),
+                            const SizedBox(height: 8),
+                            _AffinityRow(
+                              emoji: '🗡️',
+                              label: 'Rogue',
+                              sublabel: 'To-Dos',
+                              points: player.roguePoints,
+                              color: Colors.purple,
                             ),
                           ],
                         ),
                       ),
                     ),
+
+                    const SizedBox(height: 12),
+
                     // XP Bar
                     _StatBar(
                       label: 'XP',
@@ -238,7 +237,7 @@ class ProfileScreen extends ConsumerWidget {
 
             const SizedBox(height: 12),
 
-            // ── Stats Summary Card ────────────────────────
+            // ── Progress Card ─────────────────────────────
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
@@ -289,7 +288,80 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
-// ── Stat Bar ────────────────────────────────────────────────
+// ── Affinity Row ─────────────────────────────────────────────
+class _AffinityRow extends StatelessWidget {
+  final String emoji;
+  final String label;
+  final String sublabel;
+  final int points;
+  final Color color;
+
+  const _AffinityRow({
+    required this.emoji,
+    required this.label,
+    required this.sublabel,
+    required this.points,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bonus = (points * 5).clamp(0, 50);
+    return Row(
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 20)),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$label  ·  $sublabel',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 3),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: points / 10,
+                  minHeight: 6,
+                  backgroundColor: color.withValues(alpha: 0.15),
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              '$points pts',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            Text(
+              '+$bonus% XP',
+              style: TextStyle(
+                fontSize: 11,
+                color: color.withValues(alpha: 0.75),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ── Stat Bar ──────────────────────────────────────────────────
 class _StatBar extends StatelessWidget {
   final String label;
   final int value;
@@ -337,7 +409,7 @@ class _StatBar extends StatelessWidget {
   }
 }
 
-// ── Stat Chip ───────────────────────────────────────────────
+// ── Stat Chip ─────────────────────────────────────────────────
 class _StatChip extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -372,7 +444,7 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-// ── Progress Stat ───────────────────────────────────────────
+// ── Progress Stat ─────────────────────────────────────────────
 class _ProgressStat extends StatelessWidget {
   final String label;
   final String value;

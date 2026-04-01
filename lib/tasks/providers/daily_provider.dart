@@ -49,7 +49,7 @@ class DailyNotifier extends StateNotifier<List<Daily>> {
 
     // Apply class multiplier
     final player = ref.read(playerProvider);
-    final multiplier = player.characterClass?.dailyMultiplier ?? 1.0;
+    final multiplier = player.dailyMultiplier;
     final baseXp = dailyBaseXp + (completed.streak > 1 ? streakBonusXp : 0);
     final totalXp = (baseXp * multiplier).round();
 

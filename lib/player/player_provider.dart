@@ -4,7 +4,6 @@ import 'player_model.dart';
 import '../core/xp_system.dart';
 import '../core/level_system.dart';
 import '../core/economy_system.dart';
-import '../core/character_class.dart';
 
 class PlayerNotifier extends StateNotifier<PlayerModel> {
   PlayerNotifier() : super(PlayerModel()) {
@@ -22,8 +21,17 @@ class PlayerNotifier extends StateNotifier<PlayerModel> {
     box.put('player', state);
   }
 
-  void setCharacterClass(CharacterClass characterClass) {
-    state = state.copyWith(characterClassIndex: characterClass.index);
+  void setAffinityPoints({
+    required int warrior,
+    required int mage,
+    required int rogue,
+  }) {
+    assert(warrior + mage + rogue == 10, 'Affinity points must sum to 10');
+    state = state.copyWith(
+      warriorPoints: warrior,
+      magePoints: mage,
+      roguePoints: rogue,
+    );
     _save();
   }
 

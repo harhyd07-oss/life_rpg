@@ -50,8 +50,7 @@ class MyApp extends ConsumerWidget {
       themeMode: themeMode,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      // Show class selection if no class picked yet
-      home: player.hasSelectedClass
+      home: player.hasConfiguredAffinities
           ? const MainScreen()
           : const ClassSelectionScreen(isFirstTime: true),
     );
