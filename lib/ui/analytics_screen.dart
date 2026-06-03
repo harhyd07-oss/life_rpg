@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/analytics_provider.dart';
 import '../player/player_provider.dart';
 import '../core/app_theme.dart';
+import '../ai/recommendation_provider.dart';
 
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key});
@@ -11,6 +12,7 @@ class AnalyticsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final analytics = ref.watch(analyticsProvider);
     final player = ref.watch(playerProvider);
+    final recommendations = ref.watch(recommendationProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = isDark ? AppTheme.darkPrimary : AppTheme.lightPrimary;
     final secondaryColor = isDark
@@ -25,7 +27,20 @@ class AnalyticsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Total Tasks Card ──────────────────────────
+            // ── AI Recommendations ────────────────────────
+            _SectionTitle(title: 'AI Recommendations', color: primaryColor),
+            const SizedBox(height: 12),
+            _RecommendationsCard(
+              state: recommendations,
+              primaryColor: primaryColor,
+              onRefresh: () => ref
+                  .read(recommendationProvider.notifier)
+                  .fetchRecommendations(),
+            ),
+
+            const SizedBox(height: 24),
+
+            // ── Overview ──────────────────────────────────
             _SectionTitle(title: 'Overview', color: primaryColor),
             const SizedBox(height: 12),
             Row(
@@ -157,7 +172,7 @@ class AnalyticsScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${((player.xpProgress) * 100).toStringAsFixed(1)}% completed!',
+                      '${((1 - player.xpProgress) * 100).toStringAsFixed(1)}% remaining to next level',
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(
@@ -416,4 +431,176 @@ class _DayData {
   final DateTime date;
   final int count;
   _DayData({required this.date, required this.count});
+}
+
+// ── Recommendations Card ────────────────────────────────────
+class _RecommendationsCard extends StatelessWidget {
+  final RecommendationState state;
+  final Color primaryColor;
+  final VoidCallback onRefresh;
+
+  const _RecommendationsCard({
+    required this.state,
+    required this.primaryColor,
+    required this.onRefresh,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.auto_awesome, color: primaryColor, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Your Coach Says',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: Icon(Icons.refresh, color: primaryColor, size: 20),
+                  onPressed: state.isLoading ? null : onRefresh,
+                  tooltip: 'Get new recommendations',
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            if (state.isLoading)
+              Center(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Analyzing your progress...',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (state.recommendations.isEmpty)
+              Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.auto_awesome,
+                      size: 40,
+                      color: primaryColor.withValues(alpha: 0.3),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Tap refresh to get personalized\nrecommendations from your AI coach.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: onRefresh,
+                      icon: const Icon(Icons.auto_awesome, size: 16),
+                      label: const Text('Get Recommendations'),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Column(
+                children: state.recommendations
+                    .asMap()
+                    .entries
+                    .map(
+                      (entry) => _RecommendationItem(
+                        index: entry.key + 1,
+                        text: entry.value,
+                        primaryColor: primaryColor,
+                      ),
+                    )
+                    .toList(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Recommendation Item ─────────────────────────────────────
+class _RecommendationItem extends StatelessWidget {
+  final int index;
+  final String text;
+  final Color primaryColor;
+
+  const _RecommendationItem({
+    required this.index,
+    required this.text,
+    required this.primaryColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+              border: Border.all(color: primaryColor.withValues(alpha: 0.4)),
+            ),
+            child: Center(
+              child: Text(
+                '$index',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14, height: 1.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
